@@ -4,6 +4,8 @@ import requests
 from bs4 import BeautifulSoup as bs
 from urllib.request import urlopen as uReq
 import logging
+import pymongo
+from pymongo.mongo_client import MongoClient 
 logging.basicConfig(filename="scrapper.log" , level=logging.INFO)
 
 app = Flask(__name__)
@@ -72,6 +74,35 @@ def index():
                           "Comment": custComment}
                 reviews.append(mydict)
             logging.info("log my final result {}".format(reviews))
+
+
+         
+
+            uri = "mongodb+srv://Jayesh1019:jayesh1019@cluster0.hzvkeg3.mongodb.net/?retryWrites=true&w=majority"
+
+            # Create a new client and connect to the server
+            client = MongoClient(uri)
+
+            # Send a ping to confirm a successful connection
+            try:
+                client.admin.command('ping')
+                print("Pinged your deployment. You successfully connected to MongoDB!")
+            except Exception as e:
+                print(e)
+
+            #creating the database
+            db = client['review_scrap']
+
+            #creating collection in review_scrap database
+            review_coll = db['review_scrap_data']
+
+            #inserting the data of reviews dictonary
+            review_coll.insert_many(reviews)
+
+
+
+
+
             return render_template('result.html', reviews=reviews[0:(len(reviews)-1)])
         except Exception as e:
             logging.info(e)
